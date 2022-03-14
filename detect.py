@@ -1,3 +1,4 @@
+from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
 import mediapipe as mp
 import numpy as np
 import cv2
@@ -43,31 +44,37 @@ class FrameMap(object):
             height, width, _ = frame.shape
             ret1, ret2 = HAND.process(frame), POSE.process(frame)
             if ret1 and ret1.multi_hand_landmarks and ret2:
-                coordinate = [(landmark.x * width, landmark.y * height, landmark.z * 1000) for landmark in ret2.pose_landmarks.landmark]
+                coordinate = [landmark for landmark in ret2.pose_landmarks.landmark]
                 for hand in ret1.multi_hand_landmarks[:2]:
                     for landmark in hand.landmark:
-                        coordinate.append((landmark.x * width, landmark.y * height, landmark.z * 1000))
+                        coordinate.append(landmark)
                 if not len(ret1.multi_hand_landmarks) - 1:
                     index = len(coordinate) if 'Left' in str(ret1.multi_handedness[0]) else len(ret2.pose_landmarks.landmark)
-                    coordinate = coordinate[:index] + [(0, 0, 0) for _ in range(len(ret1.multi_hand_landmarks[0].landmark))] + coordinate[index:]
+                    coordinate = coordinate[:index] + [None for _ in range(len(ret1.multi_hand_landmarks[0].landmark))] + coordinate[index:]
                 coordinates.append(coordinate)
             else:
                 ignored.append(idx)
         POSE.close(), HAND.close()
-        return np.array(coordinates, dtype='int32'), np.array(ignored, dtype='uint8')
+        return np.array(coordinates, dtype='object'), np.array(ignored, dtype='uint8')
 
     @staticmethod
-    def remove_frames(frames, ignored):
+    def remove_frames(frames: np.ndarray, ignored: np.ndarray) -> np.ndarray:
         return np.delete(frames, ignored, 0)
 
 
 if __name__ == '__main__':
-    import logging
-    logging.getLogger().setLevel(logging.INFO)
-    fm = FrameMap("../sign-language-recognition/datasets/LSA64/videos/001_001_003.mp4")
-    fs = fm.video2frames()
-    logging.info(f"loaded frames {fs.shape}.")
-    c, i = fm.frames2coordinates(fs)
-    logging.info(f"coordinates {c.shape} and ignored {i.shape}.")
-    logging.info(c[10])
+    fm = FrameMap("/datasets/LSA64/videos/001_003_003.mp4")
+    array = fm.video2frames()
+    coords, ignore = fm.frames2coordinates(array[:5])
+    array = fm.remove_frames(array, ignore)
 
+    drawing = mp.solutions.drawing_utils
+    styles = mp.solutions.drawing_styles
+    landmarks = NormalizedLandmarkList
+    landmarks.landmark = coords[3][33:33+21]
+
+    # background = np.zeros((180, 180, 3))
+    background = cv2.resize(array[3], (650, 480))
+    drawing.draw_landmarks(background, landmarks, mp.solutions.hands.HAND_CONNECTIONS, styles.get_default_pose_landmarks_style())
+    cv2.imshow('frame', background)
+    cv2.waitKey(0)
