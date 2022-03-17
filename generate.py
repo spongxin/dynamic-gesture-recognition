@@ -5,23 +5,23 @@ import numpy as np
 import threading
 import logging
 import detect
+import time
 import json
 import os
 
 
 class Task(threading.Thread):
-    thread_limit = threading.Semaphore(30)
-
     def __init__(self, filename):
         super(Task, self).__init__(daemon=True)
         self.filename = filename
 
     def run(self):
         try:
-            with Task.thread_limit:
-                logging.info(f"【S】 {self.filename} 文件开始处理.")
-                self.generate()
-                logging.info(f"【D】 {self.filename} 文件保存完毕.")
+            start = time.perf_counter()
+            logging.info(f"【S】 {self.filename} 文件开始处理.")
+            self.generate()
+            finish = time.perf_counter()
+            logging.info(f"【D】 {self.filename} 文件保存完毕, 共计耗时%.1f ms." % ((finish-start)*1000))
         except Exception as err:
             logging.error(f"【E】 {self.filename} 出现异常：{err.__str__()}")
 
@@ -39,18 +39,20 @@ class Task(threading.Thread):
 
 
 def execute(files: list):
-    logging.getLogger().setLevel(logging.INFO)
+    logging.getLogger().setLevel(logging.WARNING)
+    start = time.perf_counter()
     tasks = [Task(f) for f in files]
     for task in tasks:
         task.start()
         task.join()
-    logging.info(f"【D】进程执行完毕.")
+    finish = time.perf_counter()
+    logging.warning("【D】进程执行完毕, 共计耗时%.3f s." % (finish-start))
 
 
 if __name__ == '__main__':
     processes = 4
     pool = multiprocessing.Pool(processes=processes)
-    targets = np.array_split(os.listdir(os.path.join(os.getcwd(), 'dataset', 'LSA64'))[:8], processes)
+    targets = np.array_split(os.listdir(os.path.join(os.getcwd(), 'dataset', 'LSA64')), processes)
     for i in range(processes):
         pool.apply_async(execute, args=(targets[i],))
     pool.close()
