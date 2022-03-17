@@ -1,4 +1,4 @@
-from matplotlib import pyplot as plt
+import PIL.Image as Image
 import multiprocessing
 import pandas as pd
 import numpy as np
@@ -29,17 +29,16 @@ class Task(threading.Thread):
         frame_map = detect.FrameMap(os.path.join(os.getcwd(), 'dataset', 'LSA64', self.filename))
         coordinates, _ = frame_map.frames2coordinates(frame_map.video2frames())
         features = [[[dot.x, dot.y, dot.z] if dot else [0] * 3 for dot in dots] for dots in coordinates]
-        plt.figure(figsize=(7, 6), dpi=100)
-        matrix = np.array(features, dtype='float32') * 255
-        plt.imshow(matrix.astype(np.uint8))
-        plt.savefig(os.path.join(os.getcwd(), 'dataset', 'PNG', self.filename[:-4] + '.png'))
+        Image.fromarray(
+            (np.array(features, dtype='float32') * 255).astype(np.uint8)
+        ).convert('RGB').save(os.path.join(os.getcwd(), 'dataset', 'PNG', self.filename[:-4] + '.png'))
         pd.DataFrame(
             {'feature': [json.dumps(features[line]) for line in range(len(features))]}
         ).to_csv(os.path.join(os.getcwd(), 'dataset', 'CSV', self.filename[:-4] + '.csv'))
 
 
 def execute(files: list):
-    logging.getLogger().setLevel(logging.WARNING)
+    logging.getLogger().setLevel(logging.INFO)
     start = time.perf_counter()
     tasks = [Task(f) for f in files]
     for task in tasks:
