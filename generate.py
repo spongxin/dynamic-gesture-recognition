@@ -1,58 +1,50 @@
-import PIL.Image as Image
 import multiprocessing
-import pandas as pd
 import numpy as np
-import threading
 import logging
 import detect
 import time
-import json
 import os
 
 
-class Task(threading.Thread):
+class Task:
     def __init__(self, filename):
-        super(Task, self).__init__(daemon=True)
         self.filename = filename
 
     def run(self):
         try:
             start = time.perf_counter()
-            logging.info(f"【S】 {self.filename} 文件开始处理.")
+            logging.info(f"[S] {self.filename}")
             self.generate()
             finish = time.perf_counter()
-            logging.info(f"【D】 {self.filename} 文件保存完毕, 共计耗时%.1f ms." % ((finish-start)*1000))
+            logging.info(f"[D] {self.filename} costs %.1f ms." % ((finish-start)*1000))
         except Exception as err:
-            logging.error(f"【E】 {self.filename} 出现异常：{err.__str__()}")
+            logging.error(f"[E] {self.filename}: {err.__str__()}")
 
     def generate(self):
         frame_map = detect.FrameMap(os.path.join(os.getcwd(), 'dataset', 'LSA64', self.filename))
-        coordinates, _ = frame_map.frames2coordinates(frame_map.video2frames())
-        features = [[[dot.x, dot.y, dot.z] if dot else [0] * 3 for dot in dots] for dots in coordinates]
-        Image.fromarray(
-            (np.array(features, dtype='float32') * 255).astype(np.uint8)
-        ).convert('RGB').save(os.path.join(os.getcwd(), 'dataset', 'PNG', self.filename[:-4] + '.png'))
-        pd.DataFrame(
-            {'feature': [json.dumps(features[line]) for line in range(len(features))]}
-        ).to_csv(os.path.join(os.getcwd(), 'dataset', 'CSV', self.filename[:-4] + '.csv'))
+        frames = frame_map.video2frames()
+        coordinates, ignored = frame_map.frames2coordinates(frames)
+        features = np.array([[[dot.x, dot.y, dot.z] if dot else [0] * 3 for dot in dots] for dots in coordinates], dtype='float32')
+        index = frame_map.remove_frames(np.arange(frames.shape[0]), ignored)
+        np.savez(file=os.path.join(os.getcwd(), 'dataset', 'NPZ', self.filename[:-4]), x=index, y=features)
+        del frame_map, frames, coordinates, ignored, features, index
 
 
-def execute(files: list):
+def execute(files: list, idx: int):
     logging.getLogger().setLevel(logging.INFO)
     start = time.perf_counter()
     tasks = [Task(f) for f in files]
     for task in tasks:
-        task.start()
-        task.join()
+        task.run()
     finish = time.perf_counter()
-    logging.warning("【D】进程执行完毕, 共计耗时%.3f s." % (finish-start))
+    logging.warning("[PD %d]process finish, costs %.3f s." % (idx, finish-start))
 
 
 if __name__ == '__main__':
     processes = 4
     pool = multiprocessing.Pool(processes=processes)
-    targets = np.array_split(os.listdir(os.path.join(os.getcwd(), 'dataset', 'LSA64')), processes)
+    targets = np.array_split(os.listdir(os.path.join(os.getcwd(), 'dataset', 'LSA64'))[:96], processes)
     for i in range(processes):
-        pool.apply_async(execute, args=(targets[i],))
+        pool.apply_async(execute, args=(targets[i], i))
     pool.close()
     pool.join()
