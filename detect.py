@@ -63,11 +63,13 @@ class FrameMap(object):
 
 
 if __name__ == '__main__':
-    fm = FrameMap("/datasets/LSA64/videos/001_003_003.mp4")
+    import os
+    file = os.path.join(os.getcwd(), 'dataset', 'LSA64', '001_001_001.mp4')
+    fm = FrameMap(file)
     array = fm.video2frames()
-    coords, ignore = fm.frames2coordinates(array[:5])
+    coords, ignore = fm.frames2coordinates(array)
     array = fm.remove_frames(array, ignore)
-
+    exit()
     drawing = mp.solutions.drawing_utils
     styles = mp.solutions.drawing_styles
     landmarks = NormalizedLandmarkList

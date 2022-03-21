@@ -43,7 +43,7 @@ def execute(files: list, idx: int):
 if __name__ == '__main__':
     processes = 4
     pool = multiprocessing.Pool(processes=processes)
-    targets = np.array_split(os.listdir(os.path.join(os.getcwd(), 'dataset', 'LSA64'))[:96], processes)
+    targets = np.array_split(os.listdir(os.path.join(os.getcwd(), 'dataset', 'LSA64')), processes)
     for i in range(processes):
         pool.apply_async(execute, args=(targets[i], i))
     pool.close()
