@@ -20,10 +20,11 @@ if __name__ == '__main__':
             if not success:
                 print("Ignoring empty camera frame.")
                 continue
-            image = cv2.flip(cv2.resize(image, (width//2, height//2)), 1)
-            frame = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            image = cv2.flip(cv2.resize(image, (width//2, height//2)), 1)#镜像翻转
+            frame = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)#将图片从bgr->rgb
             pose = model_pose.process(frame)
             hand = model_hand.process(frame)
+
             if hand is not None and hand.multi_hand_landmarks and pose is not None:
                 for hand_landmarks in hand.multi_hand_landmarks:
                     mp_drawing.draw_landmarks(
