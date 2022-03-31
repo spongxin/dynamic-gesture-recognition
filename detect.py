@@ -1,4 +1,3 @@
-from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
 import mediapipe as mp
 import numpy as np
 import cv2
@@ -71,10 +70,12 @@ class FrameMap(object):
         return np.array(coordinates, dtype='float32')
 
     def frames2coordinates(self, frames: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        """视频帧序列对应的所有骨骼点(Landmark)
+        """视频帧序列对应的所有骨骼点(Landmark) 将弃用
         :param frames:视频帧序列
         :return:关节点序列与被忽略帧索引序列
         """
+        import warnings
+        warnings.warn("Please use frame2landmarks and landmarks2value instead.", DeprecationWarning)
         coordinates, ignored = list(), list()
         for idx, frame in enumerate(frames):
             height, width, _ = frame.shape
@@ -101,7 +102,7 @@ class FrameMap(object):
         """
         return np.delete(frames, ignored, 0)
 
-    def draw_landmarks(self, pose, hands, background: np.ndarray):
+    def draw_landmarks(self, background: np.ndarray, pose=None, hands=None):
         """将检查结果绘制到background上
         """
         if hands is not None and hands.multi_hand_landmarks:
