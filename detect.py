@@ -57,17 +57,15 @@ class FrameMap(object):
         """骨骼点检查结果(Landmarks)转换为数值坐标序列
         由frame2landmarks检查的结果
         """
-        coordinates = []
-        pose, hands = pose.pose_landmarks.landmark, hands.multi_hand_landmarks
         if pose is not None and hands is not None:
-            coordinates = [[dot.x, dot.y, dot.z] if dot else [0] * 3 for dot in pose]
+            pose, hands = pose.pose_landmarks.landmark, hands.multi_hand_landmarks
+            coordinates = [[dot.x, dot.y, dot.z] for dot in pose]
             for hand in hands[:2]:
-                coordinates += [[dot.x, dot.y, dot.z] if dot else [0] * 3 for dot in hand.landmark]
+                coordinates += [[dot.x, dot.y, dot.z] for dot in hand.landmark]
             if not len(hands) - 1:
                 index = len(coordinates) if 'Left' in str(hands[0]) else len(pose)
-                coordinates = coordinates[:index] + [[dot.x, dot.y, dot.z] if dot else [0] * 3 for dot in
-                                                     hands[0].landmark] + coordinates[index:]
-        return np.array(coordinates, dtype='float32')
+                coordinates = coordinates[:index] + [[dot.x, dot.y, dot.z] for dot in hands[0].landmark] + coordinates[index:]
+            return np.array(coordinates, dtype='float32')
 
     def frames2coordinates(self, frames: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """视频帧序列对应的所有骨骼点(Landmark) 将弃用
