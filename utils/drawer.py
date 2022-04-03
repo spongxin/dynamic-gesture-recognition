@@ -12,15 +12,28 @@ class Drawer:
         """
         self.ani = None
         self.coordinates = coordinates
-
+        self.dic = {13: 'left_elbow', 14: 'right_elbow', 15: 'left_wrist', 16: 'right_wrist',
+               33: 'thumb_cmc', 34: 'thumb_mcp', 35: 'thumb_ip', 36: 'thumb_tip', 37: 'index_finger_mcp',
+               38: 'index_finger_pip', 39: 'index_finger_dip', 40: 'index_finger_tip', 41: 'index_finger_tip',
+               42: 'middle_finger_mcp', 43: 'middle_finger_pip', 44: 'middle_finger_dip', 45: 'middle_finger_tip',
+               46: 'right_finger_mcp', 47: 'right_finger_pip', 48: 'right_finger_dip', 49: 'right_finger_tip',
+               50: 'pinky_mcp', 51: 'pinky_pip', 52: 'pinky_dip', 53: 'pinky_tip'}
     def draw_vector(self, dots: list):
-        """视频骨骼点位移矢量图
+        """视频骨骼点位移矢量图,一共25个点的矢量图
         :param dots: 绘画骨骼点索引
         :return: none
         """
-        plt.figure(figsize=(50, 50))
+        fig=plt.figure(figsize=(30, 30))
+        fig.canvas.set_window_title('关键点位移矢量图')
+        m=1
         for dot in dots:
-            plt.subplot(15, 5, dot + 1)
+            plt.subplot(5, 5, m)
+            m+=1
+            plt.subplots_adjust(wspace=0.5,hspace=1)
+            plt.title(self.dic.get(dot))
+            ax1 = plt.gca()
+            ax1.set_xlim([0,1])  # 重点是对获取到的axes对象进行操作
+            ax1.set_ylim([0,1])  # 重点是对获取到的axes对象进行操作
             x, y = self.coordinates[:, dot, 0], self.coordinates[:, dot, 1]
             if np.sum(x) and np.sum(y):
                 plt.plot(x, y)
@@ -89,7 +102,7 @@ class Drawer:
         fig = plt.figure()
         name=["惯用手-3D检测","非惯用手-3D检测","POSE-3D检测"]
         fig.canvas.set_window_title('{}'.format(name[mod]))
-        ax = Axes3D(fig)
+        ax = Axes3D(fig,auto_add_to_figure=False)
         fig.add_axes(ax)
 
         def ani_func(i):
@@ -128,9 +141,10 @@ class Drawer:
 
 
 if __name__ == '__main__':
-    data = np.load('../dataset/NPZ/001_009_005.npz')['y']
+    data = np.load('../dataset/NPZ/031_009_004.npz')['y']
     print(data.shape)
-    Drawer(data).draw_ani(200,mod=1)
-    data = np.load('../dataset/NPZ/005_009_004.npz')['y']
-    print(data.shape)
-    Drawer(data).draw_ani(200, mod=2)
+    tmp=[13,14,15,16]
+    for x in range(33,54):
+        tmp.append(x)
+    Drawer(data).draw_vector(tmp)
+
