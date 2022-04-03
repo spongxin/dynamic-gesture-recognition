@@ -75,11 +75,13 @@ class Drawer:
         return line
     def draw_ani(self,intervals:int=200,mod:int=0):
         """画身体骨骼3d图
-            :param frame: 播放每帧的切换速度
+            :param intervals: 播放每帧的切换速度
             :param mod: 0/左手,1/右手,其他/身体,默认为左手0
             :return: none
         """
         fig = plt.figure()
+        name=["惯用手-3D检测","非惯用手-3D检测","POSE-3D检测"]
+        fig.canvas.set_window_title('{}'.format(name[mod]))
         ax = Axes3D(fig)
         def ani_func(i):
             ax.cla()
@@ -112,6 +114,6 @@ class Drawer:
         return  line
 
 if __name__ == '__main__':
-    data = np.load('dataset/NPZ/001_009_004.npz')['y']
+    data = np.load('dataset/NPZ/001_009_005.npz')['y']
     print(data.shape)
-    Drawer(data).draw_ani(200,mod=2)
+    Drawer(data).draw_ani(200,mod=1)
