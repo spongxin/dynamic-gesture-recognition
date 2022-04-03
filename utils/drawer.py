@@ -90,7 +90,6 @@ class Drawer:
         name=["惯用手-3D检测","非惯用手-3D检测","POSE-3D检测"]
         fig.canvas.set_window_title('{}'.format(name[mod]))
         ax = Axes3D(fig)
-        ax = Axes3D(fig, auto_add_to_figure=False)
         fig.add_axes(ax)
 
         def ani_func(i):
@@ -129,7 +128,7 @@ class Drawer:
 
 
 if __name__ == '__main__':
-    data = np.load('dataset/NPZ/001_009_005.npz')['y']
+    data = np.load('../dataset/NPZ/001_009_005.npz')['y']
     print(data.shape)
     Drawer(data).draw_ani(200,mod=1)
     data = np.load('../dataset/NPZ/005_009_004.npz')['y']
