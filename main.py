@@ -1,9 +1,8 @@
-from ui.window import Ui_MainWindow
-from resource import Solution
-from PyQt5 import QtWidgets
-import numpy as np
 import sys
 import os
+sys.path.append(os.getcwd())
+from resource.window import Ui_MainWindow
+from PyQt5 import QtWidgets
 
 
 labels = ["Opaque", "Red", "Green", "Yellow", "Bright", "Light-blue", "Colors", "Red", "Women", "Enemy", "Son", "Man", "Away", "Drawer", "Born", "Learn",
@@ -18,8 +17,4 @@ if __name__ == '__main__':
     ui.setupUi(window)
     window.show()
     sys.exit(app.exec_())
-    # video = "dataset/valid/003_001_001.mp4"
-    # s = Solution(model=os.path.join(os.getcwd(), 'model', 'VGGNet12'), clusters=12, min_detection=0.8)
-    # s.process(video)
-    # print(s.coords.shape)
 

@@ -1,7 +1,6 @@
-from tensorflow import keras
 from resource.detect import FrameMap
-from sklearn.cluster import KMeans
 import numpy as np
+import keras
 
 
 class Solution(object):
@@ -15,7 +14,7 @@ class Solution(object):
         self.model = model
         self.interval = interval
         self.clusters = clusters
-        self.kmeans = KMeans(n_clusters=self.clusters)
+        # self.kmeans = KMeans(n_clusters=self.clusters)
         self.min_detection = min_detection
         self.min_tracking = min_tracking
 
@@ -24,7 +23,9 @@ class Solution(object):
                 min_detection_confidence=self.min_detection,
                 min_tracking_confidence=self.min_tracking
         )
+        print('传入视频：', video)
         self.frames = fm.video2frames(video, self.interval)
+        print('导入视频：', video)
         self.landmarks = np.array([[*fm.frame2landmarks(f)] for f in self.frames])
         coords, dropped = [], []
         for index, landmark in enumerate(self.landmarks):
@@ -39,10 +40,11 @@ class Solution(object):
         fm.close()
 
     def select_key_frames(self):
-        if not self.coords:
-            return
-        self.kmeans.fit(self.coords)
-        return self.kmeans.predict(self.coords)
+        return
+        # if not self.coords:
+        #     return
+        # self.kmeans.fit(self.coords)
+        # return self.kmeans.predict(self.coords)
 
     def predict(self):
         if self.coords.shape[0] < self.clusters:
