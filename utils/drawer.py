@@ -10,6 +10,7 @@ class Drawer:
         Drawer for data <T, 75, 3>
         :param coordinates: landmark-groups of a video.
         """
+        self.ani = None
         self.coordinates = coordinates
 
     def draw_vector(self, dots: list):
@@ -92,9 +93,9 @@ class Drawer:
         def ani_func(i):
             ax.cla()
             if mod == 0 or mod == 1:
-                line = self.draw_hand(mod, i % data.shape[0], 1, ax)
+                line = self.draw_hand(mod, i % self.coordinates.shape[0], 1, ax)
             else:
-                line = self.draw_body(i % data.shape[0], 1, ax)
+                line = self.draw_body(i % self.coordinates.shape[0], 1, ax)
             return line
 
         def init():
@@ -104,7 +105,7 @@ class Drawer:
                 line = self.draw_body(0, 1, ax)
             return line
 
-        animation.FuncAnimation(fig, func=ani_func, frames=100, init_func=init, interval=intervals, blit=False)
+        self.ani = animation.FuncAnimation(fig, func=ani_func, frames=100, init_func=init, interval=intervals, blit=False)
         plt.show()
 
     @staticmethod
