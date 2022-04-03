@@ -6,6 +6,7 @@ import numpy as np
 
 class Solution(object):
     def __init__(self, model: str, clusters: int, interval: int = 1, min_detection=0.8, min_tracking=0.4):
+        self.fm = None
         self.index = None
         self.dropped = None
         self.coords = None
@@ -34,6 +35,7 @@ class Solution(object):
         self.dropped = np.array(dropped, dtype='uint')
         self.coords = fm.remove_frames(np.array(coords), self.dropped)
         self.index = fm.remove_frames(np.arange(self.frames.shape[0]), self.dropped)
+        self.fm = fm
         fm.close()
 
     def select_key_frames(self):
