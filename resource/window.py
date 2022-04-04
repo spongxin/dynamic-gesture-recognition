@@ -247,7 +247,7 @@ class Ui_MainWindow(object):
             return self.message("无矢量图数据！")
         for button in [self.pushButton, self.pushButton_2, self.pushButton_3, self.pushButton_4, self.pushButton_5, self.pushButton_6]:
             button.setEnabled(False)
-        self.drawer.draw_vector(np.arange(0, 50, step=5))
+        self.drawer.draw_vector(np.array([i for i in range(13, 17)] + [i for i in range(33, 54)]))
         for button in [self.pushButton, self.pushButton_2, self.pushButton_3, self.pushButton_4, self.pushButton_5, self.pushButton_6]:
             button.setEnabled(True)
 
