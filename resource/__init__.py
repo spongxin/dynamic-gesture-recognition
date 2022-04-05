@@ -34,7 +34,7 @@ class Solution(object):
                 continue
             dropped.append(index)
         self.dropped = np.array(dropped, dtype='uint')
-        self.coords = fm.remove_frames(np.array(coords), self.dropped)
+        self.coords = np.array(coords)
         self.index = fm.remove_frames(np.arange(self.frames.shape[0]), self.dropped)
         self.fm = fm
         fm.close()
